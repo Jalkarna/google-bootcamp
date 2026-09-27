@@ -130,4 +130,42 @@ describe("post composer", () => {
       ).disabled,
     ).toBe(false);
   });
+  it("opens LinkedIn with text only while keeping uploaded reference images", async () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    const share = vi.fn();
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: share,
+    });
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: vi.fn().mockResolvedValue(undefined) },
+    });
+    const { container } = render(<App />);
+    fireEvent.change(container.querySelector('input[type="file"]')!, {
+      target: {
+        files: [
+          new File(["reference image"], "workshop.png", { type: "image/png" }),
+        ],
+      },
+    });
+    await waitFor(() =>
+      expect(screen.getAllByAltText("workshop.png").length).toBe(2),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Edit text" }));
+    const text = "Attending the workshop. #Learning";
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Edit generated post" }),
+      { target: { value: text } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Open in LinkedIn" }));
+    expect(open).toHaveBeenCalledWith(
+      linkedinComposerUrl(text),
+      "_blank",
+      "noopener,noreferrer",
+    );
+    expect(share).not.toHaveBeenCalled();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getAllByAltText("workshop.png").length).toBe(2);
+  });
 });

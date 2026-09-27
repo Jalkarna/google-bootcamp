@@ -50,21 +50,18 @@ The generation route is a public endpoint. Keeping the key private does not prev
 
 ## LinkedIn handoff
 
-- Text-only posts: Open in LinkedIn passes the selected edited text to LinkedIn's web composer and copies it as a fallback. LinkedIn may discard text parameters during sign-in.
-- Image posts: supported browsers open the native share sheet with the **actual image files and post text**. Choose LinkedIn if it is available. The receiving app may handle text and files differently; review them before posting.
-- Browsers without file-sharing support show a transfer dialog with the original images available to download, plus an action to open LinkedIn and copy the text. Drag or attach those files in LinkedIn.
-- A web composer URL cannot automatically attach local image files. Direct API uploads require a LinkedIn developer app and member OAuth authorization; this project does not claim that integration is configured.
-- Mentions are plain text until resolved to real accounts inside LinkedIn. Nothing is automatically published.
+**Open in LinkedIn** passes the selected edited post text to LinkedIn's web composer and copies it as a fallback. This action is text-only, even when reference images have been uploaded. Images stay available for AI generation and in the local preview; they are not transferred to LinkedIn.
+
+LinkedIn may discard prefilled text during sign-in; paste the copied text if needed. Mentions are plain text until resolved to accounts in LinkedIn. Review and publish the post there; the app does not publish automatically.
 
 Drafts save text and form context in this browser. Uploaded images remain in memory and must be reattached after reloading. Review generated facts before publishing.
 
 ## Verification
 
-`npm test` checks generation, errors, editing, saving/reopening drafts, context and tone selection, Unicode text handoff, native image-file sharing, cancellation, input limits, and server credential isolation. External services are mocked in automated tests. Live Gemini text and image generation were also checked during development. Visual browser inspection requires a connected browser.
+`npm test` checks generation, errors, editing, saving/reopening drafts, context and tone selection, Unicode text handoff, text-only handoff with reference images, input limits, and server credential isolation. External services are mocked in automated tests. Live Gemini text and image generation were also checked during development. Visual browser inspection requires a connected browser.
 
 ## References
 
 - [Next.js server environment variables](https://nextjs.org/docs/app/guides/environment-variables)
 - [Vercel Function limits](https://vercel.com/docs/functions/limitations)
 - [LinkedIn photo upload and layout behavior](https://www.linkedin.com/help/linkedin/answer/a527229/share-photos-or-videos)
-- [Web Share API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Share_API)

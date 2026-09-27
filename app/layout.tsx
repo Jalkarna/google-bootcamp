@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "../src/style.css";
 export const metadata: Metadata = {
-  title: "Postly — Your ideas, worth sharing.",
+  title: "Postly — LinkedIn Post Generator",
   description:
     "Turn your ideas, experiences, and images into thoughtful LinkedIn posts.",
 };

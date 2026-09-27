@@ -36,7 +36,6 @@ import {
   Trash2,
   Leaf,
   PanelLeftClose,
-  CheckCheck,
 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
@@ -47,7 +46,7 @@ import type {
   Draft,
   PostTemplate,
 } from "./types";
-import { linkedinComposerUrl, shareWithImages } from "./sharing";
+import { linkedinComposerUrl } from "./sharing";
 import { prepareAnalysisImage } from "./images";
 const defaults: PostForm = {
   idea: "",
@@ -70,7 +69,7 @@ const defaults: PostForm = {
 };
 const templates = [
   {
-    name: "The event recap",
+    name: "Event recap",
     tag: "EXPERIENCE",
     icon: CalendarDays,
     text: "Share the people, moments, and ideas that stayed with you.",
@@ -78,7 +77,7 @@ const templates = [
     type: "Share an experience",
   },
   {
-    name: "A little career news",
+    name: "Career update",
     tag: "MILESTONE",
     icon: Sparkles,
     text: "Celebrate a new chapter with a personal touch.",
@@ -86,15 +85,15 @@ const templates = [
     type: "Celebrate a milestone",
   },
   {
-    name: "Something I learned",
+    name: "Share a lesson",
     tag: "INSIGHT",
     icon: Lightbulb,
     text: "Turn an everyday lesson into a valuable perspective.",
-    idea: "Something I learned about [topic]: [lesson]. Here’s the experience that changed how I think about it: [story].",
+    idea: "Share a lesson about [topic]: [lesson]. Here’s the experience that changed how I think about it: [story].",
     type: "Share an insight",
   },
   {
-    name: "Meet what’s next",
+    name: "Product launch",
     tag: "ANNOUNCEMENT",
     icon: ArrowUpRight,
     text: "Give your launch the introduction it deserves.",
@@ -192,8 +191,6 @@ export function App() {
     }
   });
   const [profile, setProfile] = useState(false);
-  const [handoff, setHandoff] = useState(false);
-  const [sharing, setSharing] = useState(false);
   const [expandedPost, setExpandedPost] = useState(false);
   const [firstLandscape, setFirstLandscape] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -273,7 +270,7 @@ export function App() {
         throw Error(data.error || "Generation failed. Please try again.");
       setPosts(data.posts);
       setSelected(0);
-      notify("Three fresh takes, ready for you.");
+      notify("Three variations generated.");
     } catch (e) {
       setError(
         e instanceof Error
@@ -312,22 +309,7 @@ export function App() {
       notify("Clipboard unavailable. Select and copy your draft in Edit text.");
     }
   }
-  async function openLinkedIn() {
-    if (!post.trim() || sharing) return;
-    if (images.length) {
-      setSharing(true);
-      const result = await shareWithImages(post, images);
-      setSharing(false);
-      if (result === "unsupported") setHandoff(true);
-      else if (result === "shared")
-        notify(
-          "Handed to your share app. Review the text and images there before posting.",
-        );
-      return;
-    }
-    openLinkedInText();
-  }
-  function openLinkedInText() {
+  function openLinkedIn() {
     if (!post.trim()) return;
     window.open(linkedinComposerUrl(post), "_blank", "noopener,noreferrer");
     if (navigator.clipboard) {
@@ -401,23 +383,6 @@ export function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <div className="small-promo">
-            <span className="mini-spark">
-              <Sparkles size={18} />
-            </span>
-            <h4>
-              A little inspiration.
-              <br />A lot of possibility.
-            </h4>
-            <p>
-              Your next great post starts
-              <br />
-              with an everyday idea.
-            </p>
-            <button onClick={() => setPage("Templates")}>
-              Explore templates <ArrowUpRight size={15} />
-            </button>
-          </div>
           <button className="profile" onClick={() => setProfile(true)}>
             <span className="avatar">
               {form.name === "Your name"
@@ -426,7 +391,7 @@ export function App() {
             </span>
             <span>
               {form.name === "Your name" ? "Your workspace" : form.name}
-              <small>Make it your own</small>
+              <small>Edit profile</small>
             </span>
             <SlidersHorizontal size={16} />
           </button>
@@ -449,22 +414,13 @@ export function App() {
         <main>
           <div className="page-heading">
             <div>
-              <div className="eyebrow">
-                <span /> YOUR NEXT CONVERSATION STARTS HERE
-              </div>
-              <h1>
-                {page === "Create a post"
-                  ? "Your ideas, worth sharing."
-                  : page === "Saved drafts"
-                    ? "Good ideas. Safely kept."
-                    : "A spark to get you started."}
-              </h1>
+              <h1>{page}</h1>
               <p>
                 {page === "Create a post"
-                  ? "Turn your moments, thoughts, and photos into a LinkedIn post that sounds like you."
+                  ? "Add your context to generate a LinkedIn post."
                   : page === "Saved drafts"
-                    ? "Pick up where you left off. Your drafts are saved in this browser."
-                    : "Skip the blank page. Find a starting point and make it yours."}
+                    ? "Drafts saved in this browser."
+                    : "Choose a template and add your details."}
               </p>
             </div>
             {page === "Create a post" && (
@@ -479,7 +435,7 @@ export function App() {
                   setImages([]);
                   setPosts([]);
                   setError("");
-                  notify("A fresh page, just for you.");
+                  notify("Editor cleared.");
                 }}
               >
                 <RotateCcw size={15} /> Start fresh
@@ -491,10 +447,7 @@ export function App() {
               <section className="composer">
                 <div className="section-heading">
                   <span className="step">1</span>
-                  <h2>The starting point</h2>
-                  <span className="section-note">
-                    A little context goes a long way
-                  </span>
+                  <h2>Post context</h2>
                 </div>
                 <div className="field idea-field">
                   <label htmlFor="idea">
@@ -508,12 +461,13 @@ export function App() {
                       maxLength={10000}
                       onChange={(e) => set("idea", e.target.value)}
                       placeholder={
-                        "An idea that stuck with you. An event you loved. A win worth celebrating.\n\nDon’t worry about getting the words right — that’s where we come in."
+                        "Describe your experience, project, or announcement. Include names, key takeaways, and any details the post should mention."
                       }
                     />
                     <div className="textarea-footer">
                       <span>
-                        <PenLine size={13} /> Rough thoughts welcome
+                        <PenLine size={13} /> Include the details you want in
+                        your post
                       </span>
                       <span>{form.idea.length.toLocaleString()} / 10,000</span>
                     </div>
@@ -521,8 +475,7 @@ export function App() {
                 </div>
                 <div className="field">
                   <label>
-                    Add a little visual context{" "}
-                    <span className="optional">Optional</span>
+                    Reference images <span className="optional">Optional</span>
                   </label>
                   <input
                     ref={fileRef}
@@ -607,7 +560,7 @@ export function App() {
                 <div className="context-divider" />
                 <div className="section-heading">
                   <span className="step">2</span>
-                  <h2>Make it yours</h2>
+                  <h2>Post settings</h2>
                   <span className="optional">The details are optional</span>
                 </div>
                 <div className="two-fields">
@@ -699,7 +652,7 @@ export function App() {
                   aria-expanded={advanced}
                 >
                   <SlidersHorizontal size={16} />
-                  <span>More ways to make it yours</span>
+                  <span>Advanced settings</span>
                   <span className="advanced-hint">Audience, tags & more</span>
                   <ChevronDown
                     size={16}
@@ -795,7 +748,7 @@ export function App() {
                     onClick={() => set("emojis", !form.emojis)}
                   >
                     <span className={"switch " + (form.emojis ? "on" : "")} />
-                    <span className="emoji">☺</span> A touch of emoji
+                    <span className="emoji">☺</span> Include emoji
                   </button>
                 </div>
                 {error && (
@@ -819,21 +772,18 @@ export function App() {
                   ) : (
                     <Sparkles size={19} />
                   )}{" "}
-                  {busy ? "Finding the right words…" : "Generate my post"}
+                  {busy ? "Generating…" : "Generate my post"}
                   {!busy && <ArrowRight size={18} />}
                 </button>
                 <div className="generate-note">
-                  <span>
-                    <CheckCheck size={13} /> Your voice. A little AI magic.
-                  </span>
-                  <span>3 variations to choose from</span>
+                  <span>Generates 3 editable variations</span>
                 </div>
               </section>
               <aside className="preview-column">
                 <div className="preview-heading">
                   <div>
                     <span className="live-dot" />
-                    <h2>Your post, in the wild</h2>
+                    <h2>LinkedIn preview</h2>
                   </div>
                   <div className="device-switch">
                     <button
@@ -993,18 +943,16 @@ export function App() {
                           </div>
                         </div>
                         <h3>
-                          {busy
-                            ? "A good story is taking shape…"
-                            : "A great post is on its way."}
+                          {busy ? "Generating your post…" : "No post yet"}
                         </h3>
                         <p>
                           {busy
-                            ? "Connecting your ideas, context, and voice."
-                            : "Add your ideas on the left and let’s turn them"}
+                            ? "Using your context to write three variations."
+                            : "Add your context and select Generate my post"}
                           {!busy && (
                             <>
                               <br />
-                              into something worth sharing.
+                              to see the result here.
                             </>
                           )}
                         </p>
@@ -1083,23 +1031,17 @@ export function App() {
                   </div>
                   <button
                     className="open-linkedin"
-                    disabled={!post.trim() || busy || sharing}
+                    disabled={!post.trim() || busy}
                     onClick={openLinkedIn}
                   >
                     <span className="linkedin-button-logo" aria-hidden="true">
                       in
                     </span>{" "}
-                    {sharing
-                      ? "Opening share sheet…"
-                      : images.length
-                        ? "Share post with images"
-                        : "Open in LinkedIn"}{" "}
-                    <ArrowUpRight size={16} />
+                    Open in LinkedIn <ArrowUpRight size={16} />
                   </button>
                   <p className="linkedin-handoff-note">
-                    {images.length
-                      ? "Choose LinkedIn in the share sheet. On desktop, we’ll help you transfer your images."
-                      : "Review your post in LinkedIn before publishing."}
+                    Opens LinkedIn with your post text. Images aren’t
+                    transferred.
                   </p>
                   {post && (
                     <div className="refine-actions">
@@ -1134,19 +1076,12 @@ export function App() {
                     <Lightbulb size={19} />
                   </span>
                   <div>
-                    <h4>A little tip for a better post</h4>
+                    <h4>Writing tip</h4>
                     <p>
-                      The best posts sound like a conversation, not a press
-                      release. Add a personal takeaway — it makes all the
-                      difference.
+                      Include a specific takeaway or example. Review names,
+                      dates, and other facts before publishing.
                     </p>
                   </div>
-                </div>
-                <div className="privacy-note">
-                  <span className="mini-leaf">
-                    <Leaf size={14} />
-                  </span>{" "}
-                  A thoughtful post starts with your perspective.
                 </div>
               </aside>
             </div>
@@ -1165,7 +1100,7 @@ export function App() {
                   <h2>{t.name}</h2>
                   <p>{t.text}</p>
                   <span className="use-template">
-                    Make it yours <ArrowUpRight size={17} />
+                    Use template <ArrowUpRight size={17} />
                   </span>
                 </button>
               ))}
@@ -1216,7 +1151,7 @@ export function App() {
               ) : (
                 <div className="empty-library">
                   <Bookmark size={35} />
-                  <h2>A home for your next great posts.</h2>
+                  <h2>No saved drafts</h2>
                   <p>
                     Save a draft from the editor and it will be waiting here.
                   </p>
@@ -1230,85 +1165,12 @@ export function App() {
               )}
             </div>
           )}
-          <footer>
-            <span>Made for your authentic voice.</span>
-            <span>
-              Thoughtfully powered by AI <Sparkles size={12} />
-            </span>
-          </footer>
         </main>
       </div>
       {toast && (
         <div className="toast" role="status">
           <Check size={17} />
           {toast}
-        </div>
-      )}
-      {handoff && (
-        <div
-          className="modal-backdrop"
-          onClick={() => setHandoff(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setHandoff(false);
-          }}
-        >
-          <section
-            className="profile-modal image-handoff"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="handoff-title"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="modal-close"
-              autoFocus
-              onClick={() => setHandoff(false)}
-              aria-label="Close image sharing"
-            >
-              <X size={19} />
-            </button>
-            <span className="template-icon">
-              <ImagePlus size={23} />
-            </span>
-            <h2 id="handoff-title">Take your whole story with you.</h2>
-            <p>
-              This browser can’t send files to LinkedIn directly. Your images
-              are ready below.
-            </p>
-            <ol className="handoff-steps">
-              <li>Download your images, or use the original files.</li>
-              <li>
-                Open LinkedIn below. Your post text is passed along and copied
-                as a backup.
-              </li>
-              <li>
-                Drop the images into LinkedIn’s composer, then review and post.
-              </li>
-            </ol>
-            <div className="handoff-images">
-              {images.map((image, i) => (
-                <a
-                  key={i}
-                  href={image.url}
-                  download={image.name}
-                  className="handoff-file"
-                >
-                  <img src={image.url} alt={image.name} />
-                  <span>{image.name}</span>
-                  <Download size={17} />
-                </a>
-              ))}
-            </div>
-            <button className="generate" onClick={openLinkedInText}>
-              Open LinkedIn & copy text <ArrowUpRight size={17} />
-            </button>
-            <button className="handoff-copy" onClick={copy}>
-              <Copy size={14} /> Copy post text again
-            </button>
-            <p className="handoff-footnote">
-              Images are not attached automatically in this desktop flow.
-            </p>
-          </section>
         </div>
       )}
       {profile && (
@@ -1330,7 +1192,7 @@ export function App() {
             <span className="template-icon">
               <PenLine size={23} />
             </span>
-            <h2 id="profile-title">Make yourself at home.</h2>
+            <h2 id="profile-title">Edit profile</h2>
             <p>Personalize the profile in your post preview.</p>
             <div className="field">
               <label htmlFor="profile-name">Your name</label>
